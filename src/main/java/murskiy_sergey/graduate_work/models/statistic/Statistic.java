@@ -11,13 +11,13 @@ public class Statistic {
     private String id;
     private Date date;
     private String methodName;
-    private int countOfTexts;
-    private int countOfWords;
+    private long countOfTexts;
+    private long countOfWords;
     private String topic;
     private String status;
     private long time;
 
-    public Statistic(String id, Date date, String methodName, int countOfTexts, int countOfWords, String topic, String status, long time) {
+    public Statistic(String id, Date date, String methodName, long countOfTexts, long countOfWords, String topic, String status, long time) {
         this.id = id;
         this.date = date;
         this.methodName = methodName;
@@ -55,19 +55,19 @@ public class Statistic {
         this.methodName = methodName;
     }
 
-    public int getCountOfTexts() {
+    public long getCountOfTexts() {
         return countOfTexts;
     }
 
-    public void setCountOfTexts(int countOfTexts) {
+    public void setCountOfTexts(long countOfTexts) {
         this.countOfTexts = countOfTexts;
     }
 
-    public int getCountOfWords() {
+    public long getCountOfWords() {
         return countOfWords;
     }
 
-    public void setCountOfWords(int countOfWords) {
+    public void setCountOfWords(long countOfWords) {
         this.countOfWords = countOfWords;
     }
 

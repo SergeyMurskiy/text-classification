@@ -53,10 +53,10 @@ public abstract class WekaAnalyzeService implements AnalyzeService {
         return dataset;
     }
 
-    private Instance createInstance(Map<String, Integer> textTerms, int wordsCount,  List<Attribute> attributes, Instances dataset) {
+    private Instance createInstance(Map<String, Long> textTerms, long wordsCount,  List<Attribute> attributes, Instances dataset) {
         Instance instance = new DenseInstance(attributes.size());
         attributes.forEach(attribute ->
-                instance.setValue(attribute, (double) textTerms.getOrDefault(attribute.name(), 0) / wordsCount));
+                instance.setValue(attribute, (double) textTerms.getOrDefault(attribute.name(), 0L) / wordsCount));
         instance.setDataset(dataset);
         return instance;
     }

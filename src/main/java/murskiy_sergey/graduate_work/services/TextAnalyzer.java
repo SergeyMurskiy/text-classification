@@ -51,31 +51,9 @@ public class TextAnalyzer {
     public Response getTextTerms(String documentContent) {
         List<AnalyzeResponse.AnalyzeToken> analyzeTokens = analyzeTextContent(documentContent);
 
-        Map<String, Long> collect = analyzeTokens.stream()
+        Map<String, Long> textTerms = analyzeTokens.stream()
                 .map(AnalyzeResponse.AnalyzeToken::getTerm)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-        Map<String, Integer> textTerms = new HashMap<>();
-
-        analyzeTokens.forEach(analyzeToken -> {
-            if (analyzeToken.getType().equals("<ALPHANUM>")) {
-                String term = analyzeToken.getTerm();
-                if (textTerms.containsKey(term)) {
-                    int oldCount = textTerms.get(term);
-                    textTerms.put(term, ++oldCount);
-                } else {
-                    textTerms.put(term, 1);
-                }
-//                if (term.matches("[\\p{L}| ]+") && term.length() >= 3) {
-//                    if (textTerms.containsKey(term)) {
-//                        int oldCount = textTerms.get(term);
-//                        textTerms.put(term, ++oldCount);
-//                    } else {
-//                        textTerms.put(term, 1);
-//                    }
-//                }
-            }
-        });
 
         return new Response(analyzeTokens.size(), textTerms);
     }
@@ -103,9 +81,9 @@ public class TextAnalyzer {
 
     public class Response {
         private int documentWordsCount;
-        private Map<String, Integer> documentTerms;
+        private Map<String, Long> documentTerms;
 
-        Response(int documentWordsCount, Map<String, Integer> documentTerms) {
+        Response(int documentWordsCount, Map<String, Long> documentTerms) {
             this.documentWordsCount = documentWordsCount;
             this.documentTerms = documentTerms;
         }
@@ -114,7 +92,7 @@ public class TextAnalyzer {
             return documentWordsCount;
         }
 
-        public Map<String, Integer> getTextTerms() {
+        public Map<String, Long> getTextTerms() {
             return documentTerms;
         }
     }

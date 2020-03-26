@@ -158,18 +158,18 @@ public class TextModelService {
 //        textModels.stream().map(textModel -> textModel.getTermsOfText())
 //                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         terms.forEach(term -> {
-            int N_k = textModels.stream()
-                    .mapToInt(textModel -> textModel.getTermsOfText().getOrDefault(term, 0))
+            long N_k = textModels.stream()
+                    .mapToLong(textModel -> textModel.getTermsOfText().getOrDefault(term, 0L))
                     .sum();
 
             textModels.forEach(textModel -> {
                 if (textModel.getTermsOfText().containsKey(term)) {
-                    int N_i_k = textModel.getTermsOfText().get(term);
+                    long N_i_k = textModel.getTermsOfText().get(term);
 
                     double N_i_s = textModels.stream()
                             .mapToDouble(textModel1 -> {
                                 if (!textModel1.getTextName().equals(textModel.getTextName())) {
-                                    return Math.pow(Math.log(textModel1.getTermsOfText().getOrDefault(term, 0)) + 1, 2);
+                                    return Math.pow(Math.log(textModel1.getTermsOfText().getOrDefault(term, 0L)) + 1, 2);
                                 } else {
                                     return 0;
                                 }

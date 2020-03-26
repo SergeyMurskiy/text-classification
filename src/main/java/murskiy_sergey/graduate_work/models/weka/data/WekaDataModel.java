@@ -15,13 +15,13 @@ public class WekaDataModel {
     private String name;
     private List<String> attributesNames;
     private List<String> classes;
-    private int sizeOfData;
-    private int countOfWords;
-    private Map<String, Integer> dataStatistic;
+    private long sizeOfData;
+    private long countOfWords;
+    private Map<String, Long> dataStatistic;
     private boolean active;
 
     public WekaDataModel(String modelId, String name, List<String> attributesNames, List<String> classes,
-                         int sizeOfData, int countOfWords, Map<String, Integer> dataStatistic, boolean active) {
+                         long sizeOfData, long countOfWords, Map<String, Long> dataStatistic, boolean active) {
         this.modelId = modelId;
         this.name = name;
         this.attributesNames = attributesNames;
@@ -86,27 +86,27 @@ public class WekaDataModel {
         this.classes = classes;
     }
 
-    public int getSizeOfData() {
+    public long getSizeOfData() {
         return sizeOfData;
     }
 
-    public void setSizeOfData(int sizeOfData) {
+    public void setSizeOfData(long sizeOfData) {
         this.sizeOfData = sizeOfData;
     }
 
-    public int getCountOfWords() {
+    public long getCountOfWords() {
         return countOfWords;
     }
 
-    public void setCountOfWords(int countOfWords) {
+    public void setCountOfWords(long countOfWords) {
         this.countOfWords = countOfWords;
     }
 
-    public Map<String, Integer> getDataStatistic() {
+    public Map<String, Long> getDataStatistic() {
         return dataStatistic;
     }
 
-    public void setDataStatistic(Map<String, Integer> dataStatistic) {
+    public void setDataStatistic(Map<String, Long> dataStatistic) {
         this.dataStatistic = dataStatistic;
     }
 

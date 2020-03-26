@@ -45,7 +45,7 @@ public class WekaLearningService implements LearningService {
 
         List<WekaLearningResponseEntity> wekaLearningResponseEntities = analyzeFilesContent(files, charset);
         createWekaDataEntities(topic, wekaLearningResponseEntities);
-        Map<String, Integer> dataStatistic = saveResult(wekaLearningResponseEntities, topic);
+        Map<String, Long> dataStatistic = saveResult(wekaLearningResponseEntities, topic);
 
         if (rebuildClassifier) {
             wekaClassifiers.rebuildClassifiers(wekaDataModel.getModelId());
@@ -95,7 +95,7 @@ public class WekaLearningService implements LearningService {
         });
     }
 
-    private Map<String, Integer> updateDataStatistic(Map<String, Integer> dataStatistic, String topic, int countOfTexts) {
+    private Map<String, Long> updateDataStatistic(Map<String, Long> dataStatistic, String topic, long countOfTexts) {
         if (dataStatistic.containsKey(topic)) {
             dataStatistic.put(topic, dataStatistic.get(topic) + countOfTexts);
         } else {
@@ -104,7 +104,7 @@ public class WekaLearningService implements LearningService {
         return dataStatistic;
     }
 
-    private int setDataValues(String topic, double[] data, Map<String, Integer> textTerms, int wordsCount) {
+    private int setDataValues(String topic, double[] data, Map<String, Long> textTerms, long wordsCount) {
         List<String> attributesNames = wekaDataModel.getAttributesNames();
         int countOfSetValues = 0;
         for (int i = 0; i < attributesNames.size(); i++) {
@@ -120,7 +120,7 @@ public class WekaLearningService implements LearningService {
         return countOfSetValues;
     }
 
-    private Map<String, Integer> saveResult(List<WekaLearningResponseEntity> wekaLearningResponseEntities, String topic) {
+    private Map<String, Long> saveResult(List<WekaLearningResponseEntity> wekaLearningResponseEntities, String topic) {
         List<WekaDataEntity> wekaDataEntityToSave = wekaLearningResponseEntities.stream()
                 .map(wekaLearningResponseEntity ->
                         new WekaDataEntity(wekaDataModel.getModelId(), topic,
@@ -130,11 +130,11 @@ public class WekaLearningService implements LearningService {
 
         wekaDataEntityRepository.saveAll(wekaDataEntityToSave);
 
-        int countOfWords = wekaLearningResponseEntities.stream()
-                .mapToInt(LearningResponseEntity::getCountOfWords)
+        long countOfWords = wekaLearningResponseEntities.stream()
+                .mapToLong(LearningResponseEntity::getCountOfWords)
                 .sum();
 
-        Map<String, Integer> dataStatistic = updateDataStatistic(wekaDataModel.getDataStatistic(), topic, countOfWords);
+        Map<String, Long> dataStatistic = updateDataStatistic(wekaDataModel.getDataStatistic(), topic, countOfWords);
         wekaDataModelRepository.save(
                 new WekaDataModel(wekaDataModel.getModelId(), wekaDataModel.getName(), wekaDataModel.getAttributesNames(), wekaDataModel.getClasses(),
                         (wekaDataModel.getSizeOfData() + wekaLearningResponseEntities.size()),
@@ -145,9 +145,9 @@ public class WekaLearningService implements LearningService {
     }
 
     private LearningResponse createResponse(List<WekaLearningResponseEntity> wekaLearningResponseEntities,
-                                            int inputFilesCount, String topic, Map<String, Integer> dataStatistic) {
-        int countOfWords = wekaLearningResponseEntities.stream()
-                .mapToInt(LearningResponseEntity::getCountOfWords)
+                                            int inputFilesCount, String topic, Map<String, Long> dataStatistic) {
+        long countOfWords = wekaLearningResponseEntities.stream()
+                .mapToLong(LearningResponseEntity::getCountOfWords)
                 .sum();
 
         wekaLearningResponseEntities.forEach(wekaLearningResponseEntity -> wekaLearningResponseEntity
@@ -157,7 +157,7 @@ public class WekaLearningService implements LearningService {
         return new LearningResponse(topic, inputFilesCount, countOfWords, createComment(dataStatistic), wekaLearningResponseEntities);
     }
 
-    private String createComment(Map<String, Integer> dataStatistic) {
+    private String createComment(Map<String, Long> dataStatistic) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Текущая статистика модели ").append(wekaDataModel.getClasses()).append("\n");
         dataStatistic.forEach((key, value) -> stringBuilder.append(key).append(": ").append(value).append("\n"));
