@@ -5,14 +5,14 @@ import java.util.stream.Collectors;
 
 public class LearningResponse {
     private String topic;
-    private int countOfTexts;
-    private int countOfSavedTexts;
-    private int countOfWords;
+    private long countOfTexts;
+    private long countOfSavedTexts;
+    private long countOfWords;
     private long time;
     private String comment;
     private List<? extends LearningResponseEntity> responseEntities;
 
-    public LearningResponse(String topic, int countOfTexts, int countOfWords,
+    public LearningResponse(String topic, long countOfTexts, long countOfWords,
                             long time, String comment, List<LearningResponseEntity> responseEntities) {
         this.topic = topic;
         this.countOfTexts = countOfTexts;
@@ -22,8 +22,8 @@ public class LearningResponse {
         this.comment = comment;
     }
 
-    public LearningResponse(String topic, int countOfTexts,
-                            int countOfWords, String comment, List<? extends LearningResponseEntity> responseEntities) {
+    public LearningResponse(String topic, long countOfTexts,
+                            long countOfWords, String comment, List<? extends LearningResponseEntity> responseEntities) {
         this.topic = topic;
         this.countOfTexts = countOfTexts;
         this.countOfWords = countOfWords;
@@ -41,19 +41,19 @@ public class LearningResponse {
         this.topic = topic;
     }
 
-    public int getCountOfTexts() {
+    public long getCountOfTexts() {
         return countOfTexts;
     }
 
-    public void setCountOfTexts(int countOfTexts) {
+    public void setCountOfTexts(long countOfTexts) {
         this.countOfTexts = countOfTexts;
     }
 
-    public int getCountOfWords() {
+    public long getCountOfWords() {
         return countOfWords;
     }
 
-    public void setCountOfWords(int countOfWords) {
+    public void setCountOfWords(long countOfWords) {
         this.countOfWords = countOfWords;
     }
 
@@ -65,11 +65,11 @@ public class LearningResponse {
         this.time = time;
     }
 
-    public int getCountOfSavedTexts() {
+    public long getCountOfSavedTexts() {
         return countOfSavedTexts;
     }
 
-    public void setCountOfSavedTexts(int countOfSavedTexts) {
+    public void setCountOfSavedTexts(long countOfSavedTexts) {
         this.countOfSavedTexts = countOfSavedTexts;
     }
 

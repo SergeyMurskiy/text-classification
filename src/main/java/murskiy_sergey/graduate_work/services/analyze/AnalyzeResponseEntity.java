@@ -6,21 +6,21 @@ import java.util.Map;
 
 public class AnalyzeResponseEntity {
     private String fileName;
-    private int wordsCount;
-    private Map<String, Integer> textTerms;
+    private long wordsCount;
+    private Map<String, Long> textTerms;
     private Instance instance;
     private String classValue;
     private long milliseconds;
     private String comment;
 
-    public AnalyzeResponseEntity(String fileName, int wordsCount, String classValue, long milliseconds) {
+    public AnalyzeResponseEntity(String fileName, long wordsCount, String classValue, long milliseconds) {
         this.fileName = fileName;
         this.wordsCount = wordsCount;
         this.classValue = classValue;
         this.milliseconds = milliseconds;
     }
 
-    public AnalyzeResponseEntity(String fileName, int wordsCount, Map<String, Integer> textTerms) {
+    public AnalyzeResponseEntity(String fileName, long wordsCount, Map<String, Long> textTerms) {
         this.fileName = fileName;
         this.wordsCount = wordsCount;
         this.textTerms = textTerms;
@@ -37,11 +37,11 @@ public class AnalyzeResponseEntity {
         this.fileName = fileName;
     }
 
-    public int getWordsCount() {
+    public long getWordsCount() {
         return wordsCount;
     }
 
-    public void setWordsCount(int wordsCount) {
+    public void setWordsCount(long wordsCount) {
         this.wordsCount = wordsCount;
     }
 
@@ -61,11 +61,11 @@ public class AnalyzeResponseEntity {
         this.milliseconds = milliseconds;
     }
 
-    public Map<String, Integer> getTextTerms() {
+    public Map<String, Long> getTextTerms() {
         return textTerms;
     }
 
-    public void setTextTerms(Map<String, Integer> textTerms) {
+    public void setTextTerms(Map<String, Long> textTerms) {
         this.textTerms = textTerms;
     }
 

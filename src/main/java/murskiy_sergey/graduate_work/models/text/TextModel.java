@@ -10,10 +10,10 @@ public class TextModel {
     @Id
     private String textName;
     private String textTopic;
-    private Map<String, Integer> termsOfText;
-    private int countOfWords;
+    private Map<String, Long> termsOfText;
+    private long countOfWords;
 
-    public TextModel(String textName, String textTopic, Map<String, Integer> textTerms, int countOfWords) {
+    public TextModel(String textName, String textTopic, Map<String, Long> textTerms, long countOfWords) {
         this.textName = textName;
         this.textTopic = textTopic;
         this.termsOfText = textTerms;
@@ -39,19 +39,19 @@ public class TextModel {
         this.textTopic = textTopic;
     }
 
-    public Map<String, Integer> getTermsOfText() {
+    public Map<String, Long> getTermsOfText() {
         return termsOfText;
     }
 
-    public void setTermsOfText(Map<String, Integer> textTerms) {
+    public void setTermsOfText(Map<String, Long> textTerms) {
         this.termsOfText = textTerms;
     }
 
-    public int getCountOfWords() {
+    public long getCountOfWords() {
         return countOfWords;
     }
 
-    public void setCountOfWords(int countOfWords) {
+    public void setCountOfWords(long countOfWords) {
         this.countOfWords = countOfWords;
     }
 }

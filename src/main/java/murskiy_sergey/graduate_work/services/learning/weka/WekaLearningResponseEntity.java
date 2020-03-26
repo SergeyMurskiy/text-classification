@@ -6,14 +6,14 @@ import java.util.Map;
 
 public class WekaLearningResponseEntity extends LearningResponseEntity {
     private double[] data;
-    private int countOfSetDataValues;
+    private long countOfSetDataValues;
 
-    public WekaLearningResponseEntity(String fileName, int countOfWords, Map<String, Integer> textTerms, long time, String comment, double[] data) {
+    public WekaLearningResponseEntity(String fileName, int countOfWords, Map<String, Long> textTerms, long time, String comment, double[] data) {
         super(fileName, countOfWords, textTerms, time, comment);
         this.data = data;
     }
 
-    public WekaLearningResponseEntity(String fileName, int countOfWords, Map<String, Integer> textTerms, long time) {
+    public WekaLearningResponseEntity(String fileName, int countOfWords, Map<String, Long> textTerms, long time) {
         super(fileName, countOfWords, textTerms, time);
     }
 
@@ -25,11 +25,11 @@ public class WekaLearningResponseEntity extends LearningResponseEntity {
         this.data = data;
     }
 
-    public int getCountOfSetDataValues() {
+    public long getCountOfSetDataValues() {
         return countOfSetDataValues;
     }
 
-    public void setCountOfSetDataValues(int countOfSetDataValues) {
+    public void setCountOfSetDataValues(long countOfSetDataValues) {
         this.countOfSetDataValues = countOfSetDataValues;
     }
 }

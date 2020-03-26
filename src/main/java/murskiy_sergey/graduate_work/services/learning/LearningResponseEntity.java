@@ -4,12 +4,12 @@ import java.util.Map;
 
 public class LearningResponseEntity {
     private String fileName;
-    private int countOfWords;
-    private Map<String, Integer> textTerms;
+    private long countOfWords;
+    private Map<String, Long> textTerms;
     private long time;
     private String comment;
 
-    public LearningResponseEntity(String fileName, int countOfWords, Map<String, Integer> textTerms, long time, String comment) {
+    public LearningResponseEntity(String fileName, long countOfWords, Map<String, Long> textTerms, long time, String comment) {
         this.fileName = fileName;
         this.countOfWords = countOfWords;
         this.textTerms = textTerms;
@@ -17,18 +17,18 @@ public class LearningResponseEntity {
         this.comment = comment;
     }
 
-    public LearningResponseEntity(String fileName, int countOfWords, Map<String, Integer> textTerms, long time) {
+    public LearningResponseEntity(String fileName, long countOfWords, Map<String, Long> textTerms, long time) {
         this.fileName = fileName;
         this.countOfWords = countOfWords;
         this.textTerms = textTerms;
         this.time = time;
     }
 
-    public int getCountOfWords() {
+    public long getCountOfWords() {
         return countOfWords;
     }
 
-    public void setCountOfWords(int countOfWords) {
+    public void setCountOfWords(long countOfWords) {
         this.countOfWords = countOfWords;
     }
 
@@ -56,11 +56,11 @@ public class LearningResponseEntity {
         this.fileName = fileName;
     }
 
-    public Map<String, Integer> getTextTerms() {
+    public Map<String, Long> getTextTerms() {
         return textTerms;
     }
 
-    public void setTextTerms(Map<String, Integer> textTerms) {
+    public void setTextTerms(Map<String, Long> textTerms) {
         this.textTerms = textTerms;
     }
 }

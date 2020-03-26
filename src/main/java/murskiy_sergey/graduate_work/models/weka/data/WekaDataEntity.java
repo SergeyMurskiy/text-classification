@@ -12,10 +12,10 @@ public class WekaDataEntity {
     private String id;
     private String modelId;
     private String topicName;
-    private int countOfNotEmptyValues;
+    private long countOfNotEmptyValues;
     private double[] data;
 
-    public WekaDataEntity(String modelId, String topicName, double[] data, int countOfNotEmptyValues) {
+    public WekaDataEntity(String modelId, String topicName, double[] data, long countOfNotEmptyValues) {
         id = UUID.randomUUID().toString();
         this.modelId = modelId;
         this.topicName = topicName;
@@ -65,11 +65,11 @@ public class WekaDataEntity {
         this.topicName = topicName;
     }
 
-    public int getCountOfNotEmptyValues() {
+    public long getCountOfNotEmptyValues() {
         return countOfNotEmptyValues;
     }
 
-    public void setCountOfNotEmptyValues(int countOfNotEmptyValues) {
+    public void setCountOfNotEmptyValues(long countOfNotEmptyValues) {
         this.countOfNotEmptyValues = countOfNotEmptyValues;
     }
 }
