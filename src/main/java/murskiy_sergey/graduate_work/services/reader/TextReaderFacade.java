@@ -1,7 +1,6 @@
 package murskiy_sergey.graduate_work.services.reader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,10 +10,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class TextReaderFacade {
     private final List<TextReader> textReaderList;
-    private Logger logger = LoggerFactory.getLogger(TextReaderFacade.class.getName());
 
     @Autowired
     public TextReaderFacade(List<TextReader> textReaderList) {
@@ -27,7 +26,7 @@ public class TextReaderFacade {
             try {
                 return textReader.get().getTextContent(file, charset);
             } catch (Exception e) {
-                logger.error("Cannot read file: " + file.getOriginalFilename());
+                log.error("Cannot read file: " + file.getOriginalFilename());
             }
         }
 
@@ -40,7 +39,7 @@ public class TextReaderFacade {
             try {
                 return textReader.get().getTextContent(file, charset);
             } catch (Exception e) {
-                logger.error("Cannot read file: " + file.getName());
+                log.error("Cannot read file: " + file.getName());
             }
         }
 

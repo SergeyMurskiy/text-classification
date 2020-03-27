@@ -65,7 +65,7 @@ public class WekaDataService {
             deactivateActiveModel();
         }
 
-        wekaDataModelRepository.save(new WekaDataModel(UUID.randomUUID().toString(), modelName, attributes, setActive));
+        wekaDataModelRepository.save(new WekaDataModel(modelName, attributes, setActive));
         return "Модель сохранена";
     }
 
@@ -85,15 +85,15 @@ public class WekaDataService {
             deactivateActiveModel();
         }
 
-        String id = UUID.randomUUID().toString();
-        wekaDataModelRepository.save(new WekaDataModel(id, modelName, attributes, topics, setActive));
-        wekaClassifiers.rebuildClassifiers(id);
+        WekaDataModel wekaDataModel = new WekaDataModel(modelName, attributes, topics, setActive);
+        wekaDataModelRepository.save(wekaDataModel);
+        wekaClassifiers.rebuildClassifiers();
 
         return "Модель сохранена";
     }
 
     public void buildWekaDataModel(String modelName, List<String> attributes, List<String> classes, boolean setActive) {
-        wekaDataModelRepository.save(new WekaDataModel(UUID.randomUUID().toString(), modelName, attributes, classes, setActive));
+        wekaDataModelRepository.save(new WekaDataModel(modelName, attributes, classes, setActive));
     }
 
     public void deleteModel(String modelName) {
@@ -105,7 +105,7 @@ public class WekaDataService {
     public String changeWekaDataModel(String modelName) {
         deactivateActiveModel();
         saveActiveModel(modelName);
-        boolean isClassifiersRebuild = wekaClassifiers.rebuildClassifiers(modelName);
+        boolean isClassifiersRebuild = wekaClassifiers.rebuildClassifiers();
         return getChangeModelResponse(modelName, isClassifiersRebuild);
     }
 

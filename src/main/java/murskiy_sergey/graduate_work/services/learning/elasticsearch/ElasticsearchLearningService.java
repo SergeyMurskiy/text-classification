@@ -4,92 +4,83 @@ import murskiy_sergey.graduate_work.models.term.Term;
 import murskiy_sergey.graduate_work.models.topic.Topic;
 import murskiy_sergey.graduate_work.repositories.elasticsearch.TermRepository;
 import murskiy_sergey.graduate_work.repositories.elasticsearch.TopicRepository;
-import murskiy_sergey.graduate_work.services.TextAnalyzer;
-import murskiy_sergey.graduate_work.services.learning.LearningResponse;
-import murskiy_sergey.graduate_work.services.learning.LearningService;
-import murskiy_sergey.graduate_work.services.reader.TextReaderFacade;
+import murskiy_sergey.graduate_work.services.learning.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
 @Service
-public class ElasticsearchLearningService implements LearningService {
-    private final TextAnalyzer textAnalyzer;
+public class ElasticsearchLearningService extends LearningServiceImpl {
     private final TermRepository termRepository;
     private final TopicRepository topicRepository;
-    private final TextReaderFacade textReader;
 
+    private Map<String, Term> termsToSave;
     @Autowired
-    public ElasticsearchLearningService(TextAnalyzer textAnalyzer,
-                                        TermRepository termRepository,
-                                        TopicRepository topicRepository,
-                                        TextReaderFacade textReader) {
-        this.textAnalyzer = textAnalyzer;
+    public ElasticsearchLearningService(TermRepository termRepository, TopicRepository topicRepository) {
         this.termRepository = termRepository;
         this.topicRepository = topicRepository;
-        this.textReader = textReader;
     }
 
-    public LearningResponse learning(MultipartFile[] files, String topicName, String charset, boolean rebuildClassifier) {
-        int countOfWordsInTexts = 0;
-        int countOfTexts = 0;
-        Map<String, Term> termsToSave = new HashMap<>();
+    @Override
+    public String getMethodName() {
+        return "elasticsearch";
+    }
 
-        for (MultipartFile file : files) {
-            Optional<String> content = textReader.getTextContent(file, charset);
+    @Override
+    protected void beforeLearning(String topic) {
+        termsToSave = new HashMap<>();
+    }
 
-            if (!content.isPresent()) break;
+    @Override
+    protected LearningResponseEntity handleLearningRequest(LearningRequest learningRequest) {
+        Map<String, Long> textTerms = learningRequest.getTextTerms();
+        textTerms.forEach((term, count) -> {
+            Term savedTerm = termsToSave.get(term);
 
-            TextAnalyzer.Response analyzeResponse = textAnalyzer.getTextTerms(content.get());
-            countOfWordsInTexts += analyzeResponse.getTextWordsCount();
-
-            analyzeResponse.getTextTerms().forEach((term, count) -> {
-                Term savedTerm = termsToSave.get(term);
-
-                if (savedTerm == null) {
-                    List<Term> savedTerms;
-
-                    try {
-                        savedTerms = termRepository.findByName(term);
-                        if (savedTerms.size() > 1) {
-                            System.out.println(savedTerms.size() + " " + term);
-                        }
-                        savedTerm = savedTerms.size() != 0 ? savedTerms.get(0) : null;
-                    } catch (Exception exception) {
-                        System.out.println(file.getName() + " " + term);
-                    }
+            if (savedTerm == null) {
+                Optional<Term> savedTermOP = termRepository.findById(term);
+                if (savedTermOP.isPresent()) {
+                    savedTerm = savedTermOP.get();
                 }
+            }
 
-                if (savedTerm == null) {
-                    Term termToSave = new Term(term, topicName, count);
+            if (savedTerm == null) {
+                Term termToSave = new Term(term, learningRequest.getTopic(), count);
+                termsToSave.put(term, termToSave);
+            } else {
+                savedTerm.incrementCountOfTexts();
+                savedTerm.incrementTopicInfoTermCount(learningRequest.getTopic(), count);
+                termsToSave.put(term, savedTerm);
+            }
+        });
+        return new ElasticsearchLearningResponseEntity(learningRequest.getTextName(), learningRequest.getTopic(),
+                learningRequest.getCountOfWords());
+//        return ElasticsearchLearningResponseEntity.builder()
+//                .textName(learningRequest.getTextName())
+//                .countOfWords(learningRequest.getCountOfWords())
+//                .topic(learningRequest.getTopic())
+//                .build();
+    }
 
-                    termsToSave.put(term, termToSave);
-                } else {
-                    savedTerm.incrementCountOfTexts();
-                    savedTerm.incrementTopicInfoTermCount(topicName, count);
-
-                    termsToSave.put(term, savedTerm);
-                }
-            });
-
-            countOfTexts++;
-        }
-
+    @Override
+    protected <T extends LearningResponseEntity> void saveResult(List<T> learningResponseEntity) {
         termRepository.saveAll(termsToSave.values());
 
-        Topic savedTopic = topicRepository.findByTopicName(topicName);
+        String topic = learningResponseEntity.get(0).getTopic();
+        Optional<Topic> savedTopicOP = topicRepository.findById(topic);
 
-        if (savedTopic == null) {
-            topicRepository.save(new Topic(topicName, countOfTexts, countOfWordsInTexts));
+        if (!savedTopicOP.isPresent()) {
+            topicRepository.save(new Topic(topic, learningResponseEntity.size(), getTotalWordsCount(learningResponseEntity)));
         } else {
-            savedTopic.updateTopicCounts(countOfTexts, countOfWordsInTexts);
+            Topic savedTopic = savedTopicOP.get();
+            savedTopic.updateTopicCounts(learningResponseEntity.size(), getTotalWordsCount(learningResponseEntity));
             topicRepository.save(savedTopic);
         }
+    }
 
-        return new LearningResponse();
+    @Override
+    protected void afterLearning(boolean rebuildClassifier) {
 
-        //return new ESLearningResponse(topicName, countOfTexts, countOfWordsInTexts, termsToSave.size(), 0);
     }
 }

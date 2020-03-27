@@ -2,6 +2,7 @@ package murskiy_sergey.graduate_work.controllers.info;
 
 import murskiy_sergey.graduate_work.models.dictionary.DictionaryEntity;
 import murskiy_sergey.graduate_work.repositories.DictionaryEntityRepository;
+import murskiy_sergey.graduate_work.services.TextAnalyzeResponse;
 import murskiy_sergey.graduate_work.services.TextAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -88,14 +89,11 @@ public class DictionaryController {
 //        }
 
 
-        TextAnalyzer.Response textTerms = textAnalyzer.getTextTerms(stringBuilder.toString());
+        TextAnalyzeResponse analyzeResponse = textAnalyzer.getTextTerms(stringBuilder.toString());
 
         List<DictionaryEntity> dictionaryEntities = new ArrayList<>();
-        textTerms.getTextTerms().keySet().forEach(word-> {
-            dictionaryEntities.add(new DictionaryEntity(word));
-        });
+        analyzeResponse.getTextTerms().keySet().forEach(word-> dictionaryEntities.add(new DictionaryEntity(word)));
         dictionaryEntityRepository.saveAll(dictionaryEntities);
-
 
         return "ok";
     }

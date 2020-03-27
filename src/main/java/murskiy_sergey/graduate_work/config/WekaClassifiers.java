@@ -43,8 +43,8 @@ public class WekaClassifiers {
         }
     }
 
-    public boolean rebuildClassifiers(String modelId) {
-        isBuild = buildInstances(wekaDataModelRepository.findById(modelId).get());
+    public boolean rebuildClassifiers() {
+        isBuild = buildInstances(wekaDataModelRepository.findByActiveTrue());
         if (isBuild) {
             buildJ48Classifier();
             buildNaiveBayesClassifier();

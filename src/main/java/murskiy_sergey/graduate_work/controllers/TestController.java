@@ -58,8 +58,8 @@ public class TestController {
 //            }
 //        }
 
-        File file = new File("test1111.txt");
-        TextAnalyzer.Response textAnalyzerTextTerms = textAnalyzer.getTextTerms(textReaderFacade.getTextContent(file, "UTF-8").get());
-        int a;
+//        File file = new File("test1111.txt");
+//        TextAnalyzer.Response textAnalyzerTextTerms = textAnalyzer.getTextTerms(textReaderFacade.getTextContent(file, "UTF-8").get());
+//        int a;
     }
 }
