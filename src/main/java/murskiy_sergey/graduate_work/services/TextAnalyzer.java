@@ -1,6 +1,5 @@
 package murskiy_sergey.graduate_work.services;
 
-import org.apache.lucene.search.MultiCollectorManager;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,14 +47,14 @@ public class TextAnalyzer {
         this.elasticsearchTemplate = elasticsearchTemplate;
     }
 
-    public Response getTextTerms(String documentContent) {
+    public TextAnalyzeResponse getTextTerms(String documentContent) {
         List<AnalyzeResponse.AnalyzeToken> analyzeTokens = analyzeTextContent(documentContent);
 
         Map<String, Long> textTerms = analyzeTokens.stream()
                 .map(AnalyzeResponse.AnalyzeToken::getTerm)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        return new Response(analyzeTokens.size(), textTerms);
+        return new TextAnalyzeResponse(analyzeTokens.size(), textTerms);
     }
 
     private List<AnalyzeResponse.AnalyzeToken> analyzeTextContent(String documentContent) {
@@ -77,23 +76,5 @@ public class TextAnalyzer {
         request.addTokenFilter(russianStemmer);
 
         return request;
-    }
-
-    public class Response {
-        private int documentWordsCount;
-        private Map<String, Long> documentTerms;
-
-        Response(int documentWordsCount, Map<String, Long> documentTerms) {
-            this.documentWordsCount = documentWordsCount;
-            this.documentTerms = documentTerms;
-        }
-
-        public int getTextWordsCount() {
-            return documentWordsCount;
-        }
-
-        public Map<String, Long> getTextTerms() {
-            return documentTerms;
-        }
     }
 }

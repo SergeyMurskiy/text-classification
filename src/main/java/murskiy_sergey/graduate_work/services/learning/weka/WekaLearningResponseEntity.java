@@ -1,35 +1,25 @@
 package murskiy_sergey.graduate_work.services.learning.weka;
 
+import lombok.*;
 import murskiy_sergey.graduate_work.services.learning.LearningResponseEntity;
 
-import java.util.Map;
 
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class WekaLearningResponseEntity extends LearningResponseEntity {
     private double[] data;
     private long countOfSetDataValues;
 
-    public WekaLearningResponseEntity(String fileName, int countOfWords, Map<String, Long> textTerms, long time, String comment, double[] data) {
-        super(fileName, countOfWords, textTerms, time, comment);
+    public WekaLearningResponseEntity(String textName, String topic, long countOfWords, long time, String comment, double[] data, long countOfSetDataValues) {
+        super(textName, topic, countOfWords, time, comment);
         this.data = data;
+        this.countOfSetDataValues = countOfSetDataValues;
     }
 
-    public WekaLearningResponseEntity(String fileName, int countOfWords, Map<String, Long> textTerms, long time) {
-        super(fileName, countOfWords, textTerms, time);
-    }
-
-    public double[] getData() {
-        return data;
-    }
-
-    public void setData(double[] data) {
+    @Builder
+    public WekaLearningResponseEntity(String textName, String topic, long countOfWords, double[] data, long countOfSetDataValues) {
+        super(textName, topic, countOfWords);
         this.data = data;
-    }
-
-    public long getCountOfSetDataValues() {
-        return countOfSetDataValues;
-    }
-
-    public void setCountOfSetDataValues(long countOfSetDataValues) {
         this.countOfSetDataValues = countOfSetDataValues;
     }
 }

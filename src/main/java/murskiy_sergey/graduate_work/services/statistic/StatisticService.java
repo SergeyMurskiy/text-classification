@@ -1,60 +1,51 @@
 package murskiy_sergey.graduate_work.services.statistic;
 
-import murskiy_sergey.graduate_work.config.WekaClassifiers;
 import murskiy_sergey.graduate_work.models.statistic.Statistic;
 import murskiy_sergey.graduate_work.repositories.StatisticRepository;
-import murskiy_sergey.graduate_work.services.TextModelService;
-import murskiy_sergey.graduate_work.services.analyze.AnalyzeResponse;
-import murskiy_sergey.graduate_work.services.analyze.AnalyzeResponseEntity;
-import murskiy_sergey.graduate_work.services.analyze.AnalyzeService;
-import murskiy_sergey.graduate_work.services.learning.LearningResponse;
-import murskiy_sergey.graduate_work.services.learning.elasticsearch.ElasticsearchLearningService;
-import murskiy_sergey.graduate_work.services.learning.weka.WekaLearningService;
+import murskiy_sergey.graduate_work.services.RequestService;
+import murskiy_sergey.graduate_work.services.analyze.*;
+import murskiy_sergey.graduate_work.services.learning.LearningRequest;
+import murskiy_sergey.graduate_work.services.learning.LearningService;
 import murskiy_sergey.graduate_work.services.reader.TextReaderFacade;
 import murskiy_sergey.graduate_work.services.weka.WekaDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class StatisticService {
     @Value("${text.to.load.folder}")
     private String textFolderPath;
+    @Autowired
+    private RequestService requestService;
+
+    private final List<ClassifierService> classifierServiceList;
+    private final List<LearningService> learningServiceList;
+
+    private final WekaDataService wekaDataService;
+
+    private final TextReaderFacade textReader;
+
+    private final StatisticRepository statisticRepository;
 
     @Autowired
-    private List<AnalyzeService> analyzeServiceList;
-
-    @Autowired
-    private TextModelService textModelService;
-
-    @Autowired
-    private WekaDataService wekaDataService;
-
-    @Autowired
-    private WekaClassifiers wekaClassifiers;
-
-    @Autowired
-    private WekaLearningService wekaLearningService;
-    @Autowired
-    private ElasticsearchLearningService elasticsearchLearningService;
-
-    @Autowired
-    private TextReaderFacade textReader;
-
-    @Autowired
-    private StatisticRepository statisticRepository;
+    public StatisticService(List<ClassifierService> classifierServiceList, WekaDataService wekaDataService,
+                            TextReaderFacade textReader, StatisticRepository statisticRepository,
+                            List<LearningService> learningServiceList) {
+        this.classifierServiceList = classifierServiceList;
+        this.wekaDataService = wekaDataService;
+        this.textReader = textReader;
+        this.statisticRepository = statisticRepository;
+        this.learningServiceList = learningServiceList;
+    }
 
     static class Counter {
         static int countOfTexts = 0;
-        static int countOfWords = 0;
     }
 
     public void deleteAllStatistic() {
@@ -72,11 +63,13 @@ public class StatisticService {
     public void generateStatistic(int sizeOfTexts, int sizeOfAttributes) {
         statisticRepository.deleteAll();
 
-        Counter.countOfWords = 0;
         Counter.countOfTexts = 0;
 
         Map<String, List<File>> textsFromFolder = getTextsFromFolder();
         Map<String, List<File>> etalons = getEtalonsFromFolder();
+
+        Map<String, List<ClassifierRequest>> classifierRequestMap = createClassifierRequests(etalons);
+        Map<String, List<LearningRequest>> learningRequestMap = createLearningRequests(textsFromFolder);
 
         String pattern = "MM-dd-yyyy";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
@@ -86,59 +79,29 @@ public class StatisticService {
 //        wekaDataService.buildWekaDataModel(("statistic " + sizeOfAttributes + date), textModelService.createAttributesByTFIDF(textsFromFolder, sizeOfAttributes / 3), topics, true);
         wekaDataService.buildWekaDataModel(("statistic " + sizeOfAttributes + date), sizeOfAttributes, topics, true);
 
+
         long start = System.currentTimeMillis();
         for (int i = 0; i < sizeOfTexts; i++) {
             for (String topic : topics) {
-                File text = textsFromFolder.get(topic).get(i);
+                LearningRequest learningRequest = learningRequestMap.get(topic).get(i);
 
-                Optional<MultipartFile> result = convertFileToMultipartFile(text);
-
-                if (!result.isPresent()) {
-                    break;
-                }
-
-                LearningResponse learningResponse = wekaLearningService.learning(new MultipartFile[]{result.get()}, topic, "UTF-8", true);
-                elasticsearchLearningService.learning(new MultipartFile[]{result.get()}, topic, "UTF-8", true);
-                Counter.countOfWords += learningResponse.getCountOfWords();
+                learningServiceList.forEach(learningService -> learningService.learning(Collections.singletonList(learningRequest), true));
             }
 
             Counter.countOfTexts++;
-            List<Statistic> collect = analyzeServiceList.parallelStream()
-                    .map(analyzeService -> etalons.entrySet().parallelStream()
+
+            List<Statistic> collect = classifierServiceList.stream()
+                    .map(classifierService -> classifierRequestMap.entrySet().stream()
                             .map(entry -> {
-                                AnalyzeResponse analyzeResponse = analyzeService.analyze(getMultipartFiles(entry.getValue()), "UTF-8");
-                                return analyzeResponse.getAnalyzeResponseEntities().parallelStream()
-                                        .map(analyzeResponseEntity -> createStatistic(analyzeService.getName(), entry.getKey(), analyzeResponseEntity))
+                                ClassifierResponse classifierResponse = classifierService.classifier(entry.getValue());
+                                return classifierResponse.getResponseEntities().parallelStream()
+                                        .map(classifierResponseEntity -> createStatistic(classifierService.getMethodName(), entry.getKey(), classifierResponseEntity))
                                         .collect(Collectors.toList());
                             }).collect(Collectors.toList()))
                     .flatMap(List::stream)
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
 
-//            List<AnalyzeThread> analyzeThreadList = analyzeServiceList
-//                    .stream()
-//                    .map(analyzeService -> etalons.entrySet()
-//                            .stream()
-//                            .map(entry -> {
-//                                AnalyzeThread analyzeThread = new AnalyzeThread(analyzeService, getMultipartFiles(entry.getValue()), entry.getKey(), "UTF-8");
-//                                analyzeThread.start();
-//                                return analyzeThread;
-//                            }).collect(Collectors.toList()))
-//                    .flatMap(List::stream)
-//                    .collect(Collectors.toList());
-//
-//            analyzeThreadList.forEach(analyzeThread -> {
-//                try {
-//                    analyzeThread.join();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            });
-//
-//            List<Statistic> collect = analyzeThreadList.stream()
-//                    .map(AnalyzeThread::getStatistic)
-//                    .flatMap(List::stream)
-//                    .collect(Collectors.toList());
             statisticRepository.saveAll(collect);
         }
 
@@ -146,33 +109,21 @@ public class StatisticService {
         System.out.println(end - start);
     }
 
-    private Statistic createStatistic(String methodName, String topic, AnalyzeResponseEntity analyzeResponseEntity) {
+    private Statistic createStatistic(String methodName, String topic, ClassifierResponseEntity classifierResponseEntity) {
         String status;
-        if (topic.equals(analyzeResponseEntity.getClassValue())) {
+        if (topic.equals(classifierResponseEntity.getClassValue())) {
             status = "correct";
         } else {
             status = "incorrect";
         }
-        return new Statistic(UUID.randomUUID().toString(), new Date(), methodName, Counter.countOfTexts, Counter.countOfWords,
-                topic, status, analyzeResponseEntity.getMilliseconds());
-    }
-
-    private MultipartFile[] getMultipartFiles(List<File> fileList) {
-        return fileList.stream()
-                .map(this::convertFileToMultipartFile)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toArray(MultipartFile[]::new);
-    }
-
-    private Optional<MultipartFile> convertFileToMultipartFile(File file) {
-        String name = file.getName().replace("docx", "txt");
-        String originalFileName = file.getName().replace("docx", "txt");
-        String contentType = "text/plain";
-
-        Optional<String> fileContent = textReader.getTextContent(file, "UTF-8");
-        return fileContent.map(s -> new MockMultipartFile(name, originalFileName, contentType, s.getBytes()));
-
+        return Statistic.builder()
+                .date(new Date())
+                .methodName(methodName)
+                .countOfTexts(Counter.countOfTexts)
+                .topic(topic)
+                .status(status)
+                .time(classifierResponseEntity.getTime())
+                .build();
     }
 
     private Map<String, List<File>> getTextsFromFolder() {
@@ -200,6 +151,36 @@ public class StatisticService {
                         result.put(topicFolder.getName(), Arrays.asList(texts));
                     }
                 });
+
+        return result;
+    }
+
+    private Map<String, List<ClassifierRequest>> createClassifierRequests(Map<String, List<File>> etalonTextsByTopic) {
+        Map<String, List<ClassifierRequest>> result = new HashMap<>();
+        etalonTextsByTopic.forEach((topic, textList) -> {
+            List<ClassifierRequest> classifierRequests = textList.stream()
+                    .map(textFile -> requestService.createClassifierRequest(textFile, "UTF-8"))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+
+            result.put(topic, classifierRequests);
+        });
+
+        return result;
+    }
+
+    private Map<String, List<LearningRequest>> createLearningRequests(Map<String, List<File>> textToLearnByTopic) {
+        Map<String, List<LearningRequest>> result = new HashMap<>();
+        textToLearnByTopic.forEach((topic, textList) -> {
+            List<LearningRequest> classifierRequests = textList.stream()
+                    .map(textFile -> requestService.createLearningRequest(textFile, topic, "UTF-8"))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+
+            result.put(topic, classifierRequests);
+        });
 
         return result;
     }

@@ -1,66 +1,28 @@
 package murskiy_sergey.graduate_work.services.learning;
 
-import java.util.Map;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 public class LearningResponseEntity {
-    private String fileName;
+    private String textName;
+    private String topic;
     private long countOfWords;
-    private Map<String, Long> textTerms;
     private long time;
     private String comment;
 
-    public LearningResponseEntity(String fileName, long countOfWords, Map<String, Long> textTerms, long time, String comment) {
-        this.fileName = fileName;
+    public LearningResponseEntity(String textName, String topic, long countOfWords, long time, String comment) {
+        this.textName = textName;
+        this.topic = topic;
         this.countOfWords = countOfWords;
-        this.textTerms = textTerms;
         this.time = time;
         this.comment = comment;
     }
 
-    public LearningResponseEntity(String fileName, long countOfWords, Map<String, Long> textTerms, long time) {
-        this.fileName = fileName;
+    public LearningResponseEntity(String textName, String topic, long countOfWords) {
+        this.textName = textName;
+        this.topic = topic;
         this.countOfWords = countOfWords;
-        this.textTerms = textTerms;
-        this.time = time;
-    }
-
-    public long getCountOfWords() {
-        return countOfWords;
-    }
-
-    public void setCountOfWords(long countOfWords) {
-        this.countOfWords = countOfWords;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Map<String, Long> getTextTerms() {
-        return textTerms;
-    }
-
-    public void setTextTerms(Map<String, Long> textTerms) {
-        this.textTerms = textTerms;
     }
 }

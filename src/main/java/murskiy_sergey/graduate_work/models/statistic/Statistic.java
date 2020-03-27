@@ -1,13 +1,18 @@
 package murskiy_sergey.graduate_work.models.statistic;
 
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.util.Date;
 
 @Document(indexName = "statistic-index")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Statistic {
     @Id
+    @Generated
     private String id;
     private Date date;
     private String methodName;
@@ -17,81 +22,14 @@ public class Statistic {
     private String status;
     private long time;
 
-    public Statistic(String id, Date date, String methodName, long countOfTexts, long countOfWords, String topic, String status, long time) {
-        this.id = id;
+    @Builder
+    public Statistic(Date date, String methodName, long countOfTexts, long countOfWords, String topic, String status, long time) {
         this.date = date;
         this.methodName = methodName;
         this.countOfTexts = countOfTexts;
         this.countOfWords = countOfWords;
         this.topic = topic;
         this.status = status;
-        this.time = time;
-    }
-
-    public Statistic() {
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public long getCountOfTexts() {
-        return countOfTexts;
-    }
-
-    public void setCountOfTexts(long countOfTexts) {
-        this.countOfTexts = countOfTexts;
-    }
-
-    public long getCountOfWords() {
-        return countOfWords;
-    }
-
-    public void setCountOfWords(long countOfWords) {
-        this.countOfWords = countOfWords;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
         this.time = time;
     }
 }

@@ -65,9 +65,9 @@ public class TextModelService {
         Optional<String> textContent = textReaderFacade.getTextContent(file, charset);
 
         if (textContent.isPresent()) {
-            TextAnalyzer.Response textTerms = textAnalyzer.getTextTerms(textContent.get());
+            TextAnalyzeResponse analyzeResponse = textAnalyzer.getTextTerms(textContent.get());
             TextModel textModel = new TextModel(file.getOriginalFilename(), topic,
-                    textTerms.getTextTerms(), textTerms.getTextWordsCount());
+                    analyzeResponse.getTextTerms(), analyzeResponse.getWordsCount());
 
             return Optional.of(textModel);
         }
@@ -79,9 +79,9 @@ public class TextModelService {
         Optional<String> textContent = textReaderFacade.getTextContent(file, charset);
 
         if (textContent.isPresent()) {
-            TextAnalyzer.Response textTerms = textAnalyzer.getTextTerms(textContent.get());
+            TextAnalyzeResponse analyzeResponse = textAnalyzer.getTextTerms(textContent.get());
             TextModel textModel = new TextModel(file.getName(), topic,
-                    textTerms.getTextTerms(), textTerms.getTextWordsCount());
+                    analyzeResponse.getTextTerms(), analyzeResponse.getWordsCount());
 
             return Optional.of(textModel);
         }

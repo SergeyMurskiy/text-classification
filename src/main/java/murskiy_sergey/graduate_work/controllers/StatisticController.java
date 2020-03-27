@@ -11,12 +11,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/statistic")
 public class StatisticController {
+    private final StatisticService statisticService;
+
     @Autowired
-    private StatisticService statisticService;
+    public StatisticController(StatisticService statisticService) {
+        this.statisticService = statisticService;
+    }
 
     @RequestMapping("/generate")
     public void generateStatistic() {
-        statisticService.generateStatistic(10, 100);
+        statisticService.generateStatistic(50, 1000);
     }
 
     @RequestMapping("/all")
