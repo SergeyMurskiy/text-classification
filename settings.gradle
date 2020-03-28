@@ -1,2 +1,3 @@
-rootProject.name = 'automatic-text-ranking'
+rootProject.name = 'text-classifier'
+include 'backend'
 
