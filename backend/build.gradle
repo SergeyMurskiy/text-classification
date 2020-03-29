@@ -4,9 +4,6 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 }
 
-project.libsDir = new File('libbb/')
-
-group 'murskiy_sergey.graduate_work'
 version '1.0.1'
 
 sourceCompatibility = 1.8
@@ -17,12 +14,12 @@ configurations {
     }
 }
 
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
+//    implementation files('libs/NewClassifierService-1.0.1.jar')
     compile group: 'org.springframework', name: 'spring-mock', version: '2.0.8'
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     compileOnly 'org.projectlombok:lombok'

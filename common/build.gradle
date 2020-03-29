@@ -1,0 +1,40 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version '2.2.5.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+}
+
+version '1.0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+dependencies {
+    api 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'com.google.guava:guava:28.0-jre'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile group: 'org.apache.poi', name: 'poi-scratchpad', version: '3.0.1-FINAL'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+}

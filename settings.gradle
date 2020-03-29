@@ -1,3 +1,4 @@
 rootProject.name = 'text-classifier'
 include 'backend'
-
+include 'common'
+include 'frontend'

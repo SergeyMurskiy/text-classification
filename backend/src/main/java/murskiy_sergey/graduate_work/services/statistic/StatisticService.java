@@ -51,6 +51,12 @@ public class StatisticService {
         static int countOfTexts = 0;
     }
 
+    public List<String> getAllMethodsName() {
+        return classifierServiceList.stream()
+                .map(ClassifierService::getMethodName)
+                .collect(Collectors.toList());
+    }
+
     public void deleteAllStatistic() {
         statisticRepository.deleteAll();
     }

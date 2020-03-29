@@ -1,6 +1,6 @@
-subprojects {
-    apply plugin: 'java'
-    tasks.withType(Jar) {
-        destinationDir = file("$rootDir/out")
-    }
-}
+//subprojects {
+////    apply plugin: 'java'
+////    tasks.withType(Jar) {
+////        destinationDir = file("$rootDir/out")
+////    }
+////}
