@@ -14,24 +14,24 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 import java.net.InetAddress;
 
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "murskiy_sergey.graduate_work.repositories")
+@EnableElasticsearchRepositories(basePackages = "text.classification.backend.repositories")
 public class ElasticConfiguration {
-    @Value("${elasticsearch.cluster.name}")
-    private String clusterName;
-
-    @Value("${elasticsearch.host}")
-    private String hostName;
-
-    @Value("${elasticsearch.port}")
-    private int port;
+//    @Value("${elasticsearch.cluster.name}")
+//    private String clusterName;
+//
+//    @Value("${elasticsearch.host}")
+//    private String hostName;
+//
+//    @Value("${elasticsearch.port}")
+//    private int port;
 
     @Bean
     public Client client() throws Exception{
         Settings elasticsearchSettings = Settings.builder()
-                .put("cluster.name", clusterName)
+                .put("cluster.name", "elasticsearch")
                 .build();
         TransportClient client = new PreBuiltTransportClient(elasticsearchSettings);
-        client.addTransportAddress(new TransportAddress(InetAddress.getByName(hostName), port));
+        client.addTransportAddress(new TransportAddress(InetAddress.getByName("localhost"), 9300));
         return client;
     }
 

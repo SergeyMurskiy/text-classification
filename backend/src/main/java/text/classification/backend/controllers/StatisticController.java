@@ -23,7 +23,7 @@ public class StatisticController {
 
     @RequestMapping("/generate")
     public void generateStatistic() {
-        statisticService.generateStatistic(50, 1000);
+        statisticService.generateStatistic(1000, 2000);
     }
 
     @RequestMapping("/all")

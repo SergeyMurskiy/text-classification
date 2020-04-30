@@ -15,18 +15,18 @@ import java.util.stream.Collectors;
 
 @Service
 public class TextAnalyzer {
-    @Value("${stopwords.path}")
-    private String stopWordsPath;
+//    @Value("${stopwords.path}")
+//    private String stopWordsPath;
 
     private final Map<String, Object> stopWordsFilter = new HashMap<String, Object>() {{
         put("type", "stop");
-        put("stopwords_path", stopWordsPath);
+        put("stopwords_path", "/Applications/elasticsearch-5.6.3/config/stopwords-ru.csv");
     }};
 
     private final Map<String, Object> specialCharactersFilter = new HashMap<String, Object>() {{
         put("type", "pattern_replace");
         put("pattern", "[^\\p{L}| ]+");
-        put("replacement", "");
+        put("replacement", " ");
     }};
 
     private final Map<String, Object> russianKeywords = new HashMap<String, Object>() {{

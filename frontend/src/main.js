@@ -12,7 +12,7 @@ Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
 
 Vue.config.productionTip = false;
-Vue.prototype.serverUrl = "http://" + window.location.hostname + ":8080";
+Vue.prototype.serverUrl = "http://" + window.location.hostname + ":8080/backend";
 
 const app = new Vue({
   router,
@@ -22,3 +22,9 @@ const app = new Vue({
 window.addEventListener('popstate', () => {
   app.currentRoute = window.location.pathname
 });
+
+module.exports = {
+  publicPath: process.env.NODE_ENV === 'production'
+      ? '/dist/'
+      : '/'
+}

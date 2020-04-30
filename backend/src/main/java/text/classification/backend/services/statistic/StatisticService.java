@@ -1,59 +1,65 @@
 package text.classification.backend.services.statistic;
 
+import org.springframework.context.annotation.ComponentScan;
+import text.classification.backend.AutomaticTextRanking;
+import text.classification.backend.models.dictionary.DictionaryEntity;
 import text.classification.backend.models.statistic.Statistic;
+import text.classification.backend.repositories.DictionaryEntityRepository;
 import text.classification.backend.repositories.StatisticRepository;
 import text.classification.common.services.RequestService;
-import text.classification.common.services.classifier.ClassifierRequest;
-import text.classification.common.services.classifier.ClassifierResponse;
-import text.classification.common.services.classifier.ClassifierResponseEntity;
-import text.classification.common.services.classifier.ClassifierService;
+import text.classification.common.services.classification.ClassifierRequest;
+import text.classification.common.services.classification.ClassifierResponse;
+import text.classification.common.services.classification.ClassifierResponseEntity;
+import text.classification.common.services.classifier.ClassifierConfig;
+import text.classification.common.services.classifier.ClassifierModel;
 import text.classification.common.services.learning.LearningRequest;
-import text.classification.common.services.learning.LearningService;
-import text.classification.common.services.reader.TextReaderFacade;
-import text.classification.backend.services.weka.WekaDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class StatisticService {
-    @Value("${text.to.load.folder}")
-    private String textFolderPath;
-    @Autowired
-    private RequestService requestService;
+    private final RequestService requestService;
 
-    private final List<ClassifierService> classifierServiceList;
-    private final List<LearningService> learningServiceList;
+    private final LearningService learningService;
 
-    private final WekaDataService wekaDataService;
-
-    private final TextReaderFacade textReader;
+    private final ClassificationService classificationService;
 
     private final StatisticRepository statisticRepository;
 
+    private final List<ClassifierModel> classifiers;
+
+    private final DictionaryEntityRepository dictionaryEntityRepository;
+
     @Autowired
-    public StatisticService(List<ClassifierService> classifierServiceList, WekaDataService wekaDataService,
-                            TextReaderFacade textReader, StatisticRepository statisticRepository,
-                            List<LearningService> learningServiceList) {
-        this.classifierServiceList = classifierServiceList;
-        this.wekaDataService = wekaDataService;
-        this.textReader = textReader;
+    public StatisticService(StatisticRepository statisticRepository, RequestService requestService, List<ClassifierModel> classifiers, LearningService learningService, ClassificationService classificationService, DictionaryEntityRepository dictionaryEntityRepository) {
         this.statisticRepository = statisticRepository;
-        this.learningServiceList = learningServiceList;
+        this.requestService = requestService;
+        this.classifiers = classifiers;
+        this.learningService = learningService;
+        this.classificationService = classificationService;
+        this.dictionaryEntityRepository = dictionaryEntityRepository;
     }
 
     static class Counter {
         static int countOfTexts = 0;
     }
 
+    private List<ClassifierModel> getClassifiers() {
+        String[] classifierNames = AutomaticTextRanking.context.getBeanNamesForType(ClassifierModel.class);
+        return Arrays.stream(classifierNames)
+                .map(classifierName -> (ClassifierModel) AutomaticTextRanking.context.getBean(classifierName))
+                .collect(Collectors.toList());
+    }
+
     public List<String> getAllMethodsName() {
-        return classifierServiceList.stream()
-                .map(ClassifierService::getMethodName)
+//        List<ClassifierModel> classifiers = getClassifiers();
+
+        return classifiers.stream()
+                .map(ClassifierModel::getClassifierName)
                 .collect(Collectors.toList());
     }
 
@@ -80,33 +86,37 @@ public class StatisticService {
         Map<String, List<ClassifierRequest>> classifierRequestMap = createClassifierRequests(etalons);
         Map<String, List<LearningRequest>> learningRequestMap = createLearningRequests(textsFromFolder);
 
-        String pattern = "MM-dd-yyyy";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-        String date = simpleDateFormat.format(new Date());
-
         List<String> topics = new ArrayList<>(textsFromFolder.keySet());
-//        wekaDataService.buildWekaDataModel(("statistic " + sizeOfAttributes + date), textModelService.createAttributesByTFIDF(textsFromFolder, sizeOfAttributes / 3), topics, true);
-        wekaDataService.buildWekaDataModel(("statistic " + sizeOfAttributes + date), sizeOfAttributes, topics, true);
 
+//        List<ClassifierModel> classifiers = getClassifiers();
+//        this.learningService = new LearningService(classifiers);
+//        this.classificationService = new ClassificationService(classifiers);
+
+        List<String> attributesNames = buildAttributes(sizeOfAttributes);
+        ClassifierConfig classifierConfig = new ClassifierConfig(attributesNames, topics);
+        classifiers.forEach(classifierModel -> classifierModel.buildClassifier(classifierConfig));
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < sizeOfTexts; i++) {
             for (String topic : topics) {
                 LearningRequest learningRequest = learningRequestMap.get(topic).get(i);
-
-                learningServiceList.forEach(learningService -> learningService.learning(Collections.singletonList(learningRequest), true));
+                learningService.learning(Collections.singletonList(learningRequest));
+                learningService.rebuildClassifiers();
             }
 
             Counter.countOfTexts++;
 
-            List<Statistic> collect = classifierServiceList.parallelStream()
-                    .map(classifierService -> classifierRequestMap.entrySet().parallelStream()
-                            .map(entry -> {
-                                ClassifierResponse classifierResponse = classifierService.classifier(entry.getValue());
-                                return classifierResponse.getResponseEntities().parallelStream()
-                                        .map(classifierResponseEntity -> createStatistic(classifierService.getMethodName(), entry.getKey(), classifierResponseEntity))
-                                        .collect(Collectors.toList());
-                            }).collect(Collectors.toList()))
+            List<Statistic> collect = classifierRequestMap.entrySet().parallelStream()
+                    .map(entry -> {
+                        List<ClassifierResponse> classifierResponses = classificationService.classifier(entry.getValue());
+                        return classifierResponses.stream()
+                                .map(classifierResponse -> classifierResponse.getResponseEntities()
+                                        .parallelStream()
+                                        .map(classifierResponseEntity -> createStatistic(classifierResponse.getClassifierName(),
+                                                entry.getKey(), classifierResponseEntity))
+                                        .collect(Collectors.toList()))
+                                .collect(Collectors.toList());
+                    })
                     .flatMap(List::stream)
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
@@ -136,12 +146,12 @@ public class StatisticService {
     }
 
     private Map<String, List<File>> getTextsFromFolder() {
-        File folder = new File(textFolderPath + "/learn");
+        File folder = new File("/usr/local/Cellar/tomcat/9.0.34/libexec/load/learn");
         return getFilesFromFolder(folder);
     }
 
     private Map<String, List<File>> getEtalonsFromFolder() {
-        File etalonsFolder = new File(textFolderPath + "/etalons");
+        File etalonsFolder = new File("/usr/local/Cellar/tomcat/9.0.34/libexec/load/etalons");
         Map<String, List<File>> filesFromFolder = getFilesFromFolder(etalonsFolder);
         filesFromFolder.forEach((key, value) -> filesFromFolder.put(key, value.subList(0, 33)));
         return filesFromFolder;
@@ -192,5 +202,27 @@ public class StatisticService {
         });
 
         return result;
+    }
+
+    private List<String> buildAttributes(int sizeOfAttributes) {
+        List<DictionaryEntity> dictionaryEntities = getShuffledDictionaryEntities();
+
+        if (sizeOfAttributes > dictionaryEntities.size()) {
+            sizeOfAttributes = dictionaryEntities.size();
+        }
+
+         return dictionaryEntities.stream()
+                .map(DictionaryEntity::getWord)
+                .limit(sizeOfAttributes)
+                .collect(Collectors.toList());
+    }
+
+    private List<DictionaryEntity> getShuffledDictionaryEntities() {
+        Iterable<DictionaryEntity> dictionaryEntityIterator = dictionaryEntityRepository.findAll();
+        List<DictionaryEntity> dictionaryEntities= new ArrayList<>();
+
+        dictionaryEntityIterator.forEach(dictionaryEntities::add);
+        Collections.shuffle(dictionaryEntities);
+        return dictionaryEntities;
     }
 }

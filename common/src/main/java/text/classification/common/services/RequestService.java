@@ -1,6 +1,6 @@
 package text.classification.common.services;
 
-import text.classification.common.services.classifier.ClassifierRequest;
+import text.classification.common.services.classification.ClassifierRequest;
 import text.classification.common.services.learning.LearningRequest;
 import text.classification.common.services.reader.TextReaderFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.Optional;
 
-@Service
+@Service("requestService1")
 public class RequestService {
     private final TextAnalyzer textAnalyzer;
     private final TextReaderFacade textReaderFacade;

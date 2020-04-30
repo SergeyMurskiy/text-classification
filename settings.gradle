@@ -1,4 +1,7 @@
-rootProject.name = 'text-classifier'
+rootProject.name = 'text-classification'
 include 'backend'
 include 'common'
 include 'frontend'
+include 'classifiers'
+include 'testclass'
+

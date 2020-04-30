@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 @Builder
 public class LearningResponse {
     private String topic;
+    private String classifierName;
     private long countOfTexts;
     private long countOfSavedTexts;
     private long countOfWords;

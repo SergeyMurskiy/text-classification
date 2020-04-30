@@ -18,4 +18,11 @@ public class LearningRequest {
         countOfWords = textAnalyzeResponse.getWordsCount();
         textTerms = textAnalyzeResponse.getTextTerms();
     }
+
+    public LearningRequest(String textName, String topic, long countOfWords, Map<String, Long> textTerms) {
+        this.textName = textName;
+        this.topic = topic;
+        this.countOfWords = countOfWords;
+        this.textTerms = textTerms;
+    }
 }

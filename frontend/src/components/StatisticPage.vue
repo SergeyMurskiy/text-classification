@@ -25,7 +25,7 @@
                 </div>
             </div>
             <iframe v-if="show" :key="renderKey" :src="url" class="dashboard"></iframe>
-            <iframe :src="urlTime" class="dashboard"></iframe>
+            <iframe :src="urlTime" class="dashboard1"></iframe>
         </Content>
     </div>
 </template>
@@ -118,6 +118,11 @@
     .dashboard {
         width: 100%;
         height: 300px;
+    }
+
+    .dashboard1 {
+        width: 100%;
+        height: 500px;
     }
 
     .type {
